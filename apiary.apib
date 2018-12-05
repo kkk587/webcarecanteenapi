@@ -1,0 +1,373 @@
+FORMAT: 1A
+
+# Webcare Canteen API
+
+API documentation for upcoming Webcare Canteen API.
+
+Every request must include header Accept-Language to get response in correct language, if missing or not recognized default language is used.
+
+` `
+
+Authorization token is obtained through HTTP Basic Auth or by login request for card authorization. Identification of customer (or admin) is decoded from token.
+
+    
+` `
+
+
+Successful response is code 200. Errors are returned as standard HTTP errors with corresponding error code (4xx - client error, 5xx - server error) and description 
+
+When force error occurs server returns status code 449 and object with following schema
+https://drive.google.com/file/d/0B1_u4k6eQMDqc3NnZy1Zcm53azQ/view?usp=sharing
+Client displays alert constructed from force object and responses with force_answer or force_cancel. Only POST methods implements force error.
+
+` `
+
+
+` `
+
+Definition of additional data objects with example: https://docs.google.com/document/d/14NSKxR2U8BEieUCxF4dxUFpR49ISOTBhmiXAw_OpBWQ/edit?usp=sharing
+
+` `
+
+Links returned by API can be formatted in two ways. Standard links with http:// or https:// and link to resource on page `image://product.jpg` means that path to resource is `https://server.url/image/product.jpg`
+
+` `
+
+
+All parameters and request attributes are optional by default.
+
+` `
+
+
+## Orders  [/order]
+
+
+### Create direct order [POST /order]
+
+
+
+Returns order confirmation.
+
++ Request (application/json)
+    + Headers
+    
+            Authorization: abc  (customer credentials,optional)
+    + Attributes (OrderDirectRequest)
+
+        
+
++ Response 200 (application/json)
+    + Attributes (OrderConfirmation)
+
+
+### Order payment [POST /order/payment]
+
+Request between private Web API and Septim API. Confirms successful payment of order or cancels order in case of error in payment.
+Request is authorized with admin credentials.
+    
++ Request (application/json)
+    + Headers
+    
+            Authorization: abc (admin credentials)
+        
+    + Attributes (PaymentResult)
+
++ Response 200 (application/json)
+    + Attributes
+        + success: true (boolean) - Confirmation of successful request
+
+
+## Customer profile & management [/customer]
+
+### Login [POST /customer/login]
+
+Verifies combination of customer email and password by authorization token. If combination is wrong error code is returned, otherwise response is successful and client can use the token to authorize other requests.
+
+
+Septim does not hold status of customer login. Every request is verified by Authorization token
+Request verifies if combination of email and password provided by customer is correct or provide Authorization token based on customer's card id.
+
+
++ Request (application/json)
+    + Headers
+    
+            Authorization: abc (optional) - If provided token is validated. 
+    + Attributes
+        + cardId: abc (string, optional) - Identification of card read by card reader.
+        
++ Response 200 (application/json)
+    + Attributes
+        + success: true (boolean, optional) - Result of authorization token validation.
+        + token: abc (string, optional) - Authorization token for provided cardId
+ 
+
+### Customer registration (1st step) [POST /customer/register/start]
+
+Customer email, name and other profiles informations (components defined in web config) for registration. Email to customer is sent to verify his address.
+Email contains link needed (with token) to continue registration process.
+
++ Request (application/json)
+    + Attributes (CustomerProfileRequest)
+
++ Response 200 (application/json)
+    + Attributes
+        + success: true (boolean) - Confirmation of successful registration step.
+       
+
+### Customer registration (2st step) [POST /customer/register/finish]
+
+Customer enters his password and completes registration. Login is not needed after this step.
+
++ Request (application/json)
+    + Attributes
+
+        + password (string, required) - Password provided by customer
+        + token: abc (string, required) - Token from emailed link. Customer is identified by token.
++ Response 200 (application/json)
+    + Attributes
+        + success: true (boolean) - Confirmation of successful registration step.
+
+### Change Password [POST /customer/password/change]
+
+Need to provide old Password to authorize password change.
+
+
++ Request (application/json)
+
+    + Headers
+    
+            Authorization: abc
+
+    + Attributes
+        + passwordOld (string, required) - Old password provided by customer to verifies his identity. Required if changing password of logged customer.
+        + passwordNew (string, required) - New password to change provided by customer.
+
++ Response 200 (application/json)
+    + Attributes
+        + success: true (boolean)
+       
+
+### Request Password Reset [POST /customer/password/resetrequest]
+
+Email with link for password reset (reset key) is send to customer if customer exist in database.
+
+
++ Request
+    + Attributes
+        + email (string, required) - Email of customer for password reset
+
++ Response 200 (application/json)
+    + Attributes
+        + success: true (boolean) - Confirmation of successful email reset request
+       
+### Reset Password [POST /customer/password/reset]
+
+Second step of password reset. Need to provide key sent to customer by email (reset request).
+
++ Request (application/json)
+
+
+    + Attributes
+        + passwordNew (string, required) - New password to change provided by customer.
+        + resetKey (string, required) - Reset key sent to customer by email. Customer is identified by by this key.
+
++ Response 200 (application/json)
+    + Attributes
+        + success: true (boolean)
+       
+
+### Get Customer Profile [GET /customer]
+
+Returns profile of current customer.
+
++ Request (application/json)
+    + Headers
+    
+            Authorization: abc (required)
+
++ Response 200 (application/json)
+    + Attributes (CustomerProfile)
+
+### Change Customer Profile [POST /customer]
+
+Change customer informations.
+
++ Request (application/json)
+    + Headers
+    
+            Authorization: abc (required)
+    + Attributes (CustomerProfileRequest)
+
++ Response 200 (application/json)
+    + Attributes
+        + success: true (boolean)
+
+### Get active orders and last completed orders [GET /customer/orders?limitClosedCount={limitClosedCount}&statusCodes={statusCodes}]
+
+Returns list of customer's last orders, closed orders are limited by query parameter limit.
+
++ Parameters
+    - limitClosedCount: 5 (number) - Number of closed orders to be returned. If not provided results are limited by Septim to 10 results.
+    - statusCodes: 1,2,3 (array[number]) - List of status code to be included in results. If not provided orders are not filtered by status.
++ Request (application/json)
+    + Headers
+    
+            Authorization: abc (required)
+
++ Response 200 (application/json)
+    + Attributes (array[Order])
+    
+
+### Get order [GET /customer/order?orderId={orderId}]
+
+Return single order of customer by id.
+
++ Parameters
+    - orderId: abc (string) - Identification of order
++ Request (application/json)
+    + Headers
+    
+            Authorization: abc (required)
+
++ Response 200 (application/json)
+    + Attributes (Order)
+
+
+### Get last transaction history & account balance [GET /customer/account?limitCount={limitCount}]
+
+
+Returns customer's transaction history and current account balance.
+
++ Parameters
+    - limitCount: 5 (number) - Number of results to be returned. If not provided results are limited by Septim to 10 results.
++ Request (application/json)
+    + Headers
+    
+            Authorization: abc (required)
+
++ Response 200 (application/json)
+    + Attributes 
+        + transactions (array[Transaction]) - List of transactions
+        + balance: 430 (number) - Current customer's balance
+
+
+## Web API requests [/api]
+
+
+### Get payment link [POST /api/payment/link]
+
+Not part of Septim API
+    
+Request between client and web api.
+
+After payment validation, browser is redirected to specified return URL with GET parameters withpayment result. (?paymentSuccess=true)
+
++ Request (application/json)
+    + Headers
+    
+            Authorization: abc (customer credentials,optional)
+
+    + Attributes (GatewayRequest)
++ Response 200
+    + Attributes (GatewayResponse)
+        
+
+        
+
+      
+
+# Data Structure
+
+## CancelStatus (enum[number])
+- 0 - Cannot be cancled
+- 1 - Can be offered for exchange
+- 2 - Can be cancled
+
+## Product
+
+- id: 123 (number) - Product unique identificator
+- name: Soup (string) - Product display name
+- image: image://123.jpg (string) - Url to product image. See Introduction -  Links
+- description: Product Description (string) - Product description text
+- size: 200 ml (string) - Size of product (weight, volume...)
+- allergens (array[ProductAllergen]) - List of allergens in product
+- additionalData (array[AdditionalData]) - Other product informations
+
+## ProductAllergen
+
+- shortName: 01 (string) - Short name of allergen
+- longName: Shrimp (string) - Long name of allergen
+
+
+## OrderItem
+- productId: 123 (number, required) - Id of product to order
+- modifiers (array[number]) - List of selected modifier ids.
+- quantity: 2 (number) - Quantity of ordered product. If not provided quantity is 1.
+
+## AdditionalData 
+- id: customerCountry (string, required) - Id of data object in administration
+- value: Czech Republic (string, required) - Value of data object
+
+
+## Canteen 
+- id: 77 (number) - Unique identificator of outlet
+- name: Outlet 1 (string) - Display name of outlet
+
+
+## CustomerProfileRequest
+
+- email: john.doe@gmail.com (string) - Customer email (unique in database). Cannot be changed
+- firstName: John (string) - First name of customer
+- lastName: Doe (string) - Last name of customer
+- additionalData (array[AdditionalData]) - Other customer informations
+
+
+## CustomerProfile (CustomerProfileRequest)
+- id: 832 (number) - Unique id of customer
+
+
+## OrderDirectRequest (OrderItem)
+- price: 300 (number, required) - Price of order.
+- pruductId: 123 (number, required) - Product for order
+- groupId: soup (string, required) - Group of meal
+- orderDate: `dd-MM-yyyy` (string, required) - Date order will be created for
+
+
+## Order
+- id: abc (string) - Unique identification of order
+- date:  `dd-MM-yyyy` (string) - Date of order
+- groupId: launch (string) - Group of order
+- products (array[OrderItem]) - List of ordered products
+- canteenId: 77 (number)
+- status: 0 (number) - Current status code of order. See introduction for status codes description.
+- cancelStatus (CancelStatus)
+- price: 232 (number) - Total price of order
+
+## OrderConfirmation
+- id: abc (string) - Unique identification of order
+- status: 0 (number) - Current status code of order. See introduction for status codes description.
+- orderPrice: 232 (number) - The order price. Note, that when the orderType is "toBill", it is no the price of the whole bill but only of the current part of the order.
+
+
+## Transaction
+- id: 23 (number) - Unique identificator of transaction
+- amount: `-300` (number) - Amount changed on customer account
+- dateTime `dd-MM-yyyy HH:mm`  (string) - DateTime of transaction
+- description: Payment of order 233 (string) - Description text of transaction
+
+##GatewayRequest
+- toBePaid: 111 (number) - The amount, which should be paid.
+- returnUrl: http://return.url/ (string) -  Defines return adress, after payement completion
+
+##GatewayResponse
+- gatewayLink: http://link.to.gateway/payment (string) - Link to payment gateway
+
+
+## PaymentResult
+- paymentId: abc (string, required) - Id of payment
+- paymentSuccessful: true (boolean, required) - Result of payment
+
+## PaymentResultResponse
+- toBePaid: 122 (number) - The amount, which remains to be paid for the order.
+- paid: 23 (number) - see order.paid
+- status: 1 (number) -  The order status. Order status = 1 (waiting) in combination with toBePaid = 0 means, that the order has been succesfully and fully paid.
