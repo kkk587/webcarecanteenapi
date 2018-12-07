@@ -38,13 +38,67 @@ All parameters and request attributes are optional by default.
 
 ` `
 
+#Enumarated types:
+## CancelStatus (enum[number])
+- 0 - Cannot be cancled
+- 1 - Can be offered for exchange
+- 2 - Can be cancled
+
+## OrderStatus (enum[string])
+- active - Current orders
+- closed - Past orders
+- forExchange - Order offered for exchange
+- cancled - Cancled orders
+
+## MenuStatus (enum[number])
+- 0 - Orders closed
+- 1 - Sold out
+- 2 - Available to order single item
+- 3 - Available to order multiple items
+
+## MenuTimeSpan (enum[string])
+- day - 1 day time span
+- week - 7 day time span
+- timespan - Configured time span of menu
+
+## HealthIndex (enum[number])
+- 0 - Unhealthy - red
+- 1 - Normal - orange
+- 2 - Healthy - green
+
+## Menu [/menu]
+
+### Get menu [GET /menu?date={date}&timespan={timespan}&firstDay={firstDay}&canteenId={canteenId}]
+Get menu for customer. If no attributes are provided menu is based on customer default preferences set in Septim.
+
++ Parameters 
+    - date:  `dd-MM-yyyy` (string, optional) - Date of order
+    - timespan: launch (MenuTimeSpan, optional) - selected time span of order
+    - canteenId: 12 (number, optional) - id of selected canteen
+
++ Request (application/json)
+    + Headers
+    
+            Authorization: abc  (required) - customer authorization
+
+        
+
++ Response 200 (application/json)
+    + Attributes (MenuResponse)
+
+## Canteens [/canteen]
+
+### Get canteens [GET /canteen]
+
+
++ Response 200 (application/json)
+    + Attributes (array[Canteen])
+
 
 ## Orders  [/order]
 
 
-### Create direct order [POST /order]
-
-
+### Create direct order [POST /order/direct]
 
 Returns order confirmation.
 
@@ -57,24 +111,47 @@ Returns order confirmation.
         
 
 + Response 200 (application/json)
-    + Attributes (OrderConfirmation)
+    + Attributes
+        + success: true (boolean)
+        
 
+        
+### Create order from cart [POST /order/cart]
 
-### Order payment [POST /order/payment]
+Returns order confirmation.
 
-Request between private Web API and Septim API. Confirms successful payment of order or cancels order in case of error in payment.
-Request is authorized with admin credentials.
-    
 + Request (application/json)
     + Headers
     
-            Authorization: abc (admin credentials)
+            Authorization: abc  (customer credentials)
+            
+    + Attributes (OrderCartRequest)
+
         
-    + Attributes (PaymentResult)
 
 + Response 200 (application/json)
     + Attributes
-        + success: true (boolean) - Confirmation of successful request
+        + success: true (boolean)
+        
+        
+
+### Create order from cart [POST /order/cart/check]
+
+Check if order can be placed.
+
++ Request (application/json)
+    + Headers
+    
+            Authorization: abc  (customer credentials)
+            
+    + Attributes (OrderCartRequest)
+
+        
++ Response 200 (application/json)
+    + Attributes
+        + success: true (boolean)
+
+
 
 
 ## Customer profile & management [/customer]
@@ -232,6 +309,22 @@ Return single order of customer by id.
 + Response 200 (application/json)
     + Attributes (Order)
 
+### Top up customer account [POST /customer/account/topup]
+
+
+Request customer account top up. Webcare api creates unique transaction id for payment gateway.
+
++ Request (application/json)
+    + Headers
+    
+            Authorization: abc (required)
+    + Attributes
+         + amount 12 (number, required) - Amount to top up.
+
++ Response 200 (application/json)
+    + Attributes 
+        + transactionId: 2332 (number, required) - Unique transaction id for payment gateway.
+        
 
 ### Get last transaction history & account balance [GET /customer/account?limitCount={limitCount}]
 
@@ -251,6 +344,22 @@ Returns customer's transaction history and current account balance.
         + balance: 430 (number) - Current customer's balance
 
 
+### Top up payment result [POST /customer/topup/result]
+
+Request between private Web API and Septim API. Confirms successful payment of transaction or cancels order in case of error in payment.
+Request is authorized with admin credentials.
+    
++ Request (application/json)
+    + Headers
+    
+            Authorization: abc (admin credentials)
+        
+    + Attributes (PaymentResult)
+
++ Response 200 (application/json)
+    + Attributes
+        + success: true (boolean) - Confirmation of successful request
+        
 ## Web API requests [/api]
 
 
@@ -278,96 +387,168 @@ After payment validation, browser is redirected to specified return URL with GET
 
 # Data Structure
 
+
+
 ## CancelStatus (enum[number])
 - 0 - Cannot be cancled
 - 1 - Can be offered for exchange
 - 2 - Can be cancled
 
+## OrderStatus (enum[string])
+- active - Current orders
+- closed - Past orders
+- forExchange - Order offered for exchange
+- cancled - Cancled orders
+
+## MenuStatus (enum[number])
+- 0 - Orders closed
+- 1 - Sold out
+- 2 - Available to order single item
+- 3 - Available to order multiple items
+
+## MenuTimeSpan (enum[string])
+- day - 1 day time span
+- week - 7 day time span
+- timespan - Configured time span of menu
+
+## HealthIndex (enum[number])
+- 0 - Unhealthy - red
+- 1 - Normal - orange
+- 2 - Healthy - green
+
+## AdditionDataComponent (enum[string])
+- const-image
+- const-text
+- var-image
+- var-text
+- input-text
+
 ## Product
 
-- id: 123 (number) - Product unique identificator
-- name: Soup (string) - Product display name
-- image: image://123.jpg (string) - Url to product image. See Introduction -  Links
-- description: Product Description (string) - Product description text
-- size: 200 ml (string) - Size of product (weight, volume...)
-- allergens (array[ProductAllergen]) - List of allergens in product
-- additionalData (array[AdditionalData]) - Other product informations
+- id: 123 (number, required) - Product unique identificator
+- name: Soup (string, required) - Product display name
+- image: image://123.jpg (string, required) - Url to product image. See Introduction -  Links
+- description: Product Description (string, required) - Product description text
+- size: 200 ml (string, required) - Size of product (weight, volume...)
+- allergens (array[ProductAllergen], required, fixed-type) - List of allergens in product
+- additionalData (array[AdditionalData], optional, fixed-type) - Other product informations
 
 ## ProductAllergen
 
-- shortName: 01 (string) - Short name of allergen
-- longName: Shrimp (string) - Long name of allergen
+- shortName: 01 (string, required) - Short name of allergen
+- longName: Shrimp (string, required) - Long name of allergen
 
 
 ## OrderItem
 - productId: 123 (number, required) - Id of product to order
-- modifiers (array[number]) - List of selected modifier ids.
-- quantity: 2 (number) - Quantity of ordered product. If not provided quantity is 1.
-
-## AdditionalData 
-- id: customerCountry (string, required) - Id of data object in administration
-- value: Czech Republic (string, required) - Value of data object
+- modifiers (array[number], required) - List of selected modifier ids.
+- quantity: 2 (number, required) - Quantity of ordered product. If not provided quantity is 1.
 
 
 ## Canteen 
-- id: 77 (number) - Unique identificator of outlet
-- name: Outlet 1 (string) - Display name of outlet
+- id: 77 (number, required) - Unique identificator of outlet
+- name: Outlet 1 (string, required) - Display name of outlet
+
+## MenuRequest 
+- date:  `dd-MM-yyyy` (string, optional) - Date of order
+- timespan: week (MenuTimeSpan, optional) - selected time span of order
+- canteenId: 12 (number, optional) - id of selected canteen
+
+## MenuResponse
+- filters (array[MenuFilter], required, fixed-type) - Available filters for menu
+- menu (array[Menu], required, fixed-type) - Menu by days
+- timespan: week (MenuTimeSpan, required, sample) - Displayed timespan of menu
+- canteenId: 123 (number, required) - Canteen id of menu
+
+## Menu
+- date:  `dd-MM-yyyy` (string, required) - Date of menu
+- items (array[MenuItem], required, fixed-type) - Available menu items
+
+
+## MenuItem
+- id: 23 (number, required) - Id of menu item
+- productId: 2 (number, nullable, optional) - Id of product recipe
+- price: 23 (number, required) - Price of item
+- name: Menu 1 (string, required) - Name of menu
+- status: 0 (MenuStatus, sample, required)
+
+## MenuFilter
+- value: launch (string, required) - Value for filter
+- label: Obed (string, required) - Label of filter
+
+## OrderDirectRequest
+- price: 300 (number, required) - Price of order.
+- item (MenuItem, required) - Item to order
+- filter: soup (string, required) - Group of meal
+- orderDate: `dd-MM-yyyy` (string, required) - Date order will be created for
+
+## OrderCartRequest
+- price: 300 (number, required) - Price of order.
+- pruductId: 123 (number, required) - Product for order
+- filter: soup (string, required) - Group of meal
+- orderDate: `dd-MM-yyyy` (string, required) - Date order will be created for
+- items (array[MenuItem], required, fixed-type) - Items to order
+
+
+## Order
+- id: abc (string, required) - Unique identification of order
+- date:  `dd-MM-yyyy` (string, required) - Date of order
+- filter: launch (string, required) - Group of order
+- items (array[MenuItem], required, fixed-type) - List of ordered products
+- canteenId: 77 (number, required)
+- status: 0 (OrderStatus, sample, required) - Current status code of order
+- cancelStatus: 0 (CancelStatus, sample, required) - Cancel options
+- price: 232 (number, required) - Total price of order
+- additionalData (array[AdditionalData],optional, fixed-type) - Other order informations
+
+
+
+## OrderConfirmation
+- id: abc (string, required) - Unique identification of order
+- status: 0 (number, required) - Current status code of order
+- orderPrice: 232 (number, required) - The order price.
 
 
 ## CustomerProfileRequest
 
-- email: john.doe@gmail.com (string) - Customer email (unique in database). Cannot be changed
-- firstName: John (string) - First name of customer
-- lastName: Doe (string) - Last name of customer
-- additionalData (array[AdditionalData]) - Other customer informations
+- email: john.doe@gmail.com (string, required) - Customer email (unique in database). Cannot be changed
+- firstName: John (string, required) - First name of customer
+- lastName: Doe (string, required) - Last name of customer
+- additionalData (array[AdditionalData], optional, fixed-type) - Other customer informations
 
 
 ## CustomerProfile (CustomerProfileRequest)
-- id: 832 (number) - Unique id of customer
+- id: 832 (number, required) - Unique id of customer
 
 
-## OrderDirectRequest (OrderItem)
-- price: 300 (number, required) - Price of order.
-- pruductId: 123 (number, required) - Product for order
-- groupId: soup (string, required) - Group of meal
-- orderDate: `dd-MM-yyyy` (string, required) - Date order will be created for
+## AdditionalDataBase
+- variableId: customerCountry (string, required) - Id of data object in administration
+- value: Czech Republic (string, required) - Value of data object
 
+## AdditionalData (AdditionalDataBase, fixed-type)
 
-## Order
-- id: abc (string) - Unique identification of order
-- date:  `dd-MM-yyyy` (string) - Date of order
-- groupId: launch (string) - Group of order
-- products (array[OrderItem]) - List of ordered products
-- canteenId: 77 (number)
-- status: 0 (number) - Current status code of order. See introduction for status codes description.
-- cancelStatus (CancelStatus)
-- price: 232 (number) - Total price of order
-
-## OrderConfirmation
-- id: abc (string) - Unique identification of order
-- status: 0 (number) - Current status code of order. See introduction for status codes description.
-- orderPrice: 232 (number) - The order price. Note, that when the orderType is "toBill", it is no the price of the whole bill but only of the current part of the order.
-
+## AdditionalDataRequest (AdditionalDataBase)
+- type: input-text (AdditionDataComponent,required, sample) - Type of data object
+- label: Label (string, optional) - input label which describes the field. for type input-text
+- target (string, optional) - target of data object
 
 ## Transaction
-- id: 23 (number) - Unique identificator of transaction
-- amount: `-300` (number) - Amount changed on customer account
-- dateTime `dd-MM-yyyy HH:mm`  (string) - DateTime of transaction
-- description: Payment of order 233 (string) - Description text of transaction
+- id: 23 (number, required) - Unique identificator of transaction
+- amount: `-300` (number, required) - Amount changed on customer account
+- dateTime `dd-MM-yyyy HH:mm`  (string, required) - DateTime of transaction
+- description: Payment of order 233 (string, required) - Description text of transaction
 
 ##GatewayRequest
-- toBePaid: 111 (number) - The amount, which should be paid.
-- returnUrl: http://return.url/ (string) -  Defines return adress, after payement completion
+- toBePaid: 111 (number, required) - The amount, which should be paid.
+- returnUrl: http://return.url/ (string, required) -  Defines return adress, after payement completion
 
 ##GatewayResponse
-- gatewayLink: http://link.to.gateway/payment (string) - Link to payment gateway
+- gatewayLink: http://link.to.gateway/payment (string, required) - Link to payment gateway
 
 
 ## PaymentResult
-- paymentId: abc (string, required) - Id of payment
+- transactionId: abc (string, required) - Id of transaction
 - paymentSuccessful: true (boolean, required) - Result of payment
 
 ## PaymentResultResponse
-- toBePaid: 122 (number) - The amount, which remains to be paid for the order.
-- paid: 23 (number) - see order.paid
-- status: 1 (number) -  The order status. Order status = 1 (waiting) in combination with toBePaid = 0 means, that the order has been succesfully and fully paid.
+- paid: 23 (number, required) - amount paid by customer
