@@ -39,32 +39,32 @@ All parameters and request attributes are optional by default.
 ` `
 
 #Enumarated types
-## CancelStatus (enum[number])
-- 0 - Cannot be cancled
-- 1 - Can be offered for exchange
-- 2 - Can be cancled
+## CancelStatus (enum[string])
+- NOT_POSSIBLE - Cannot be canceled
+- FOR_EXCHANGE - Can be offered for exchange
+- POSSIBLE - Can be canceled
 
 ## OrderStatus (enum[string])
-- active - Current orders
-- closed - Past orders
-- forExchange - Order offered for exchange
-- cancled - Cancled orders
+- ACTIVE - Current orders
+- CLOSED - Past orders
+- FOR_EXCHANGE - Order offered for exchange
+- CANCELED - Canceled orders
 
-## MenuStatus (enum[number])
-- 0 - Orders closed
-- 1 - Sold out
-- 2 - Available to order single item
-- 3 - Available to order multiple items
+## MenuStatus (enum[string])
+- CLOSED - Orders closed
+- SOLD_OUT - Sold out
+- SINGLE_ITEM - Available to order single item
+- MULTIPLE - Available to order multiple items
 
 ## MenuTimeSpan (enum[string])
-- day - 1 day time span
-- week - 7 day time span
-- timespan - Configured time span of menu
+- DAY - 1 day time span
+- WEEK - 7 day time span
+- TIMESPAN - Configured time span of menu
 
-## HealthIndex (enum[number])
-- 0 - Unhealthy - red
-- 1 - Normal - orange
-- 2 - Healthy - green
+## HealthIndex (enum[string])
+- UNHEALTHY - Unhealthy - red
+- NORMAL - Normal - orange
+- HEALTHY - Healthy - green
 
 ## Menu [/menu]
 
@@ -73,7 +73,7 @@ Get menu for customer. If no attributes are provided menu is based on customer d
 
 + Parameters 
     - date:  `dd-MM-yyyy` (string, optional) - Date of order
-    - timespan: launch (MenuTimeSpan, optional) - selected time span of order
+    - timespan: DAY (MenuTimeSpan, optional) - selected time span of order
     - canteenId: 12 (number, optional) - id of selected canteen
 
 + Request (application/json)
@@ -319,7 +319,7 @@ Request customer account top up. Webcare api creates unique transaction id for p
     
             Authorization: abc (required)
     + Attributes
-         + amount 12 (number, required) - Amount to top up.
+         + amount: 12 (number, required) - Amount to top up.
 
 + Response 200 (application/json)
     + Attributes 
@@ -346,7 +346,7 @@ Returns customer's transaction history and current account balance.
 
 ### Top up payment result [POST /customer/topup/result]
 
-Request between private Web API and Septim API. Confirms successful payment of transaction or cancels order in case of error in payment.
+Request between private Web API and Septim API. Confirms successful payment of transaction or cancels transaction in case of error in payment.
 Request is authorized with admin credentials.
     
 + Request (application/json)
@@ -363,7 +363,7 @@ Request is authorized with admin credentials.
 ## Web API requests [/api]
 
 
-### Get payment link [POST /api/payment/link]
+### Get payment link [POST /api/topup/link]
 
 Not part of Septim API
     
@@ -389,32 +389,32 @@ After payment validation, browser is redirected to specified return URL with GET
 
 
 
-## CancelStatus (enum[number])
-- 0 - Cannot be cancled
-- 1 - Can be offered for exchange
-- 2 - Can be cancled
+## CancelStatus (enum[string])
+- NOT_POSSIBLE - Cannot be canceled
+- FOR_EXCHANGE - Can be offered for exchange
+- POSSIBLE - Can be canceled
 
 ## OrderStatus (enum[string])
-- active - Current orders
-- closed - Past orders
-- forExchange - Order offered for exchange
-- cancled - Cancled orders
+- ACTIVE - Current orders
+- CLOSED - Past orders
+- FOR_EXCHANGE - Order offered for exchange
+- CANCELED - Canceled orders
 
-## MenuStatus (enum[number])
-- 0 - Orders closed
-- 1 - Sold out
-- 2 - Available to order single item
-- 3 - Available to order multiple items
+## MenuStatus (enum[string])
+- CLOSED - Orders closed
+- SOLD_OUT - Sold out
+- SINGLE_ITEM - Available to order single item
+- MULTIPLE - Available to order multiple items
 
 ## MenuTimeSpan (enum[string])
-- day - 1 day time span
-- week - 7 day time span
-- timespan - Configured time span of menu
+- DAY - 1 day time span
+- WEEK - 7 day time span
+- TIMESPAN - Configured time span of menu
 
-## HealthIndex (enum[number])
-- 0 - Unhealthy - red
-- 1 - Normal - orange
-- 2 - Healthy - green
+## HealthIndex (enum[string])
+- UNHEALTHY - Unhealthy - red
+- NORMAL - Normal - orange
+- HEALTHY - Healthy - green
 
 ## AdditionDataComponent (enum[string])
 - const-image
@@ -479,15 +479,14 @@ After payment validation, browser is redirected to specified return URL with GET
 ## OrderDirectRequest
 - price: 300 (number, required) - Price of order.
 - item (MenuItem, required) - Item to order
-- filter: soup (string, required) - Group of meal
 - orderDate: `dd-MM-yyyy` (string, required) - Date order will be created for
+- canteenId: 12 (number, required) - Canteen for order
 
 ## OrderCartRequest
 - price: 300 (number, required) - Price of order.
-- pruductId: 123 (number, required) - Product for order
-- filter: soup (string, required) - Group of meal
 - orderDate: `dd-MM-yyyy` (string, required) - Date order will be created for
 - items (array[MenuItem], required, fixed-type) - Items to order
+- canteenId: 12 (number, required) - Canteen for order.
 
 
 ## Order
