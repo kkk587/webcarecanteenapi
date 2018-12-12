@@ -470,7 +470,7 @@ After payment validation, browser is redirected to specified return URL with GET
 - productId: 2 (number, nullable, optional) - Id of product recipe
 - price: 23 (number, required) - Price of item
 - name: Menu 1 (string, required) - Name of menu
-- status: 0 (MenuStatus, sample, required)
+- status: SINGLE_ITEMstatu (MenuStatus, sample, required)
 
 ## MenuFilter
 - value: launch (string, required) - Value for filter
@@ -495,8 +495,8 @@ After payment validation, browser is redirected to specified return URL with GET
 - filter: launch (string, required) - Group of order
 - items (array[MenuItem], required, fixed-type) - List of ordered products
 - canteenId: 77 (number, required)
-- status: 0 (OrderStatus, sample, required) - Current status code of order
-- cancelStatus: 0 (CancelStatus, sample, required) - Cancel options
+- status: ACTIVE (OrderStatus, sample, required) - Current status code of order
+- cancelStatus: POSSIBLE (CancelStatus, sample, required) - Cancel options
 - price: 232 (number, required) - Total price of order
 - additionalData (array[AdditionalData],optional, fixed-type) - Other order informations
 
@@ -504,7 +504,7 @@ After payment validation, browser is redirected to specified return URL with GET
 
 ## OrderConfirmation
 - id: abc (string, required) - Unique identification of order
-- status: 0 (number, required) - Current status code of order
+- status: ACTIVE (OrderStatus, required) - Current status code of order
 - orderPrice: 232 (number, required) - The order price.
 
 
