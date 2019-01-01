@@ -71,6 +71,16 @@ All parameters and request attributes are optional by default.
 ### Get menu [GET /menu?date={date}&timespan={timespan}&firstDay={firstDay}&canteenId={canteenId}]
 Get menu for customer. If no attributes are provided menu is based on customer default preferences set in Septim.
 
+!! Podle mně je zanoření denní nabídky do subobjektu zbytečné (pole objektů které obsahují další pole objektů), udělal bych to v jedné úrovni jako pole objektů s tím, že atributem objektu by bylo datum. Takže by existovalo více objektů se stejným datem. Ale možná k Vašemu řešení máte nějaký důvod. Dalším důvodem proč mi to nedává smysl je to, že zanořujete datum, ale už nezanořujete jídlo (oběd, večeře).
+!! Přijde mi divné dávat pole na začátek a jednoduché atributy na konec. Jsem zvyklý to dělat obráceně.
+!! Informace o jídle máte neúplné. Chybí 
+  * Skupina jídel - Oběd, Večeře
+  * Filtr .. chybí hodnota podle které se bude filtrovat
+  * Alergeny .. Asi je najdete v informacích o recepturách, ale je otázkou, jestli je nutné volat pro každou položku další dotaz. Podle mně ne. Totéž platí i o názvu receptury. 
+!! Neexistuje žádné "ID of menu item". Existuje pouze ID jídla. Za mně by jste měl převést "jídlo" i "recept" na dvě položky, id záznamu a název záznamu. 
+!! Když jsem přidával "zdravost" k existujícím objednávkám tak jsem jí zapomněl přidat i sem. Respektive má být tady a ne v objednávkách. 
+!! Musím říct, že mně nebaví porovnávat jestli jste správně opsal hodnoty které jsem sepsal jako potřebné. Rád bych svojí práci napřel užitečnějším směrem. 
+
 + Parameters 
     - date:  `dd-MM-yyyy` (string, optional) - Date of order
     - timespan: DAY (MenuTimeSpan, optional) - selected time span of order
@@ -90,6 +100,8 @@ Get menu for customer. If no attributes are provided menu is based on customer d
 
 ### Get canteens [GET /canteen]
 
+!! Chybí mi tady popis co to má dělat. 
+!! Povinným parametrem je identifikace zákazníka
 
 + Response 200 (application/json)
     + Attributes (array[Canteen])
@@ -99,6 +111,8 @@ Get menu for customer. If no attributes are provided menu is based on customer d
 
 
 ### Create direct order [POST /order/direct]
+
+!! Proč se to liší od toho, co chceme (a potřebujeme). Tedy zákazníka, datum, id jídla a množství
 
 Returns order confirmation.
 
@@ -117,6 +131,8 @@ Returns order confirmation.
 
         
 ### Create order from cart [POST /order/cart]
+
+!! Nekontrolováno, nejprve upravte dle základní objednávky. 
 
 Returns order confirmation.
 
@@ -137,6 +153,8 @@ Returns order confirmation.
 
 ### Check  order from cart [POST /order/cart/check]
 
+!! Nekontrolováno, nejprve upravte dle základní objednávky. 
+
 Check if order can be placed.
 
 + Request (application/json)
@@ -155,6 +173,10 @@ Check if order can be placed.
 
 
 ## Customer profile & management [/customer]
+
+!! tohle vůbec nechápu. To je novinka řešená v rámci této druhé části? Buď bude tenhle dokument pro celé API (což teď není) nebo jenom pro novou funkcionalitu a teprve nakonec to sloučíme. Preferuji druhou možnost, bude teď přehlednější. 
+!! Hlavně tady chybí to nejdůležitější, login zákazníka kartou. Data connector vám předá token přečtené karty a vy se s ním přihlásíte. Takže budou dva loginy, jménem a heslem nebo tokenem karty. 
+
 
 ### Login [POST /customer/login]
 
@@ -283,6 +305,9 @@ Change customer informations.
 
 Returns list of customer's last orders, closed orders are limited by query parameter limit.
 
+!! Proč to je v rozporu s mým popisem? 
+!! Vracená data jsou paskvil - například se vrací pole objednávek, ale status objednávky je jenom jeden
+
 + Parameters
     - limitClosedCount: 5 (number, optional) - Number of closed orders to be returned. If not provided results are limited by Septim to 10 results.
     - statusCodes: 1,2,3 (array[number], optional) - List of status code to be included in results. If not provided orders are not filtered by status.
@@ -297,7 +322,11 @@ Returns list of customer's last orders, closed orders are limited by query param
 
 ### Get order [GET /customer/order?orderId={orderId}]
 
+
 Return single order of customer by id.
+
+!! K čemu to je potřeba?
+!! Proč chcete vracet pole objednávek?
 
 + Parameters
     - orderId: abc (string) - Identification of order
