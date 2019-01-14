@@ -68,7 +68,7 @@ All parameters and request attributes are optional by default.
 
 ## Menu [/menu]
 
-### Get menu [GET /menu?date={date}&timespan={timespan}&firstDay={firstDay}&canteenId={canteenId}]
+### Get menu (NEW) [GET /menu?date={date}&timespan={timespan}&firstDay={firstDay}&canteenId={canteenId}]
 Get menu for customer. If no attributes are provided menu is based on customer default preferences set in Septim.
 
 + Parameters 
@@ -80,7 +80,6 @@ Get menu for customer. If no attributes are provided menu is based on customer d
     + Headers
     
             Authorization: abc  (required) - customer authorization
-
         
 
 + Response 200 (application/json)
@@ -88,9 +87,15 @@ Get menu for customer. If no attributes are provided menu is based on customer d
 
 ## Canteens [/canteen]
 
-### Get canteens [GET /canteen]
+### Get canteens (NEW) [GET /canteen]
 
+Get list of canteens for customer.
 
++ Request (application/json)
+    + Headers
+    
+            Authorization: abc  (customer credentials)
+            
 + Response 200 (application/json)
     + Attributes (array[Canteen])
 
@@ -98,14 +103,14 @@ Get menu for customer. If no attributes are provided menu is based on customer d
 ## Orders  [/order]
 
 
-### Create direct order [POST /order/direct]
+### Create direct order (NEW) [POST /order/direct]
 
 Returns order confirmation.
 
 + Request (application/json)
     + Headers
     
-            Authorization: abc  (customer credentials,optional)
+            Authorization: abc  (customer credentials)
     + Attributes (OrderDirectRequest)
 
         
@@ -116,7 +121,7 @@ Returns order confirmation.
         
 
         
-### Create order from cart [POST /order/cart]
+### Create order from cart (NEW) [POST /order/cart]
 
 Returns order confirmation.
 
@@ -135,7 +140,7 @@ Returns order confirmation.
         
         
 
-### Check  order from cart [POST /order/cart/check]
+### Check  order from cart (NEW) [POST /order/cart/check]
 
 Check if order can be placed.
 
@@ -156,7 +161,7 @@ Check if order can be placed.
 
 ## Customer profile & management [/customer]
 
-### Login [POST /customer/login]
+### Login (CHANGED) [POST /customer/login]
 
 Verifies combination of customer email and password by authorization token. If combination is wrong error code is returned, otherwise response is successful and client can use the token to authorize other requests.
 
@@ -279,13 +284,13 @@ Change customer informations.
     + Attributes
         + success: true (boolean)
 
-### Get active orders and last completed orders [GET /customer/orders?limitClosedCount={limitClosedCount}&statusCodes={statusCodes}]
+### Get active orders and last completed orders (CHANGED) [GET /customer/orders?limitClosedCount={limitClosedCount}&statusCodes={statusCodes}]
 
 Returns list of customer's last orders, closed orders are limited by query parameter limit.
 
 + Parameters
     - limitClosedCount: 5 (number, optional) - Number of closed orders to be returned. If not provided results are limited by Septim to 10 results.
-    - statusCodes: 1,2,3 (array[number], optional) - List of status code to be included in results. If not provided orders are not filtered by status.
+    - statusCodes (array[OrderStatus], optional) - List of status code to be included in results. If not provided orders are not filtered by status.
 + Request (application/json)
     + Headers
     
@@ -295,7 +300,7 @@ Returns list of customer's last orders, closed orders are limited by query param
     + Attributes (array[Order])
     
 
-### Get order [GET /customer/order?orderId={orderId}]
+### Get order (CHANGED) [GET /customer/order?orderId={orderId}]
 
 Return single order of customer by id.
 
@@ -309,7 +314,7 @@ Return single order of customer by id.
 + Response 200 (application/json)
     + Attributes (Order)
 
-### Top up customer account [POST /customer/account/topup]
+### Top up customer account (NEW) [POST /customer/account/topup]
 
 
 Request customer account top up. Webcare api creates unique transaction id for payment gateway.
@@ -344,7 +349,7 @@ Returns customer's transaction history and current account balance.
         + balance: 430 (number) - Current customer's balance
 
 
-### Top up payment result [POST /customer/topup/result]
+### Top up payment result (NEW) [POST /customer/topup/result]
 
 Request between private Web API and Septim API. Confirms successful payment of transaction or cancels transaction in case of error in payment.
 Request is authorized with admin credentials.
@@ -363,7 +368,7 @@ Request is authorized with admin credentials.
 ## Web API requests [/api]
 
 
-### Get payment link [POST /api/topup/link]
+### Get payment link for(NEW) [POST /api/topup/link]
 
 Not part of Septim API
     
@@ -430,7 +435,6 @@ After payment validation, browser is redirected to specified return URL with GET
 - image: image://123.jpg (string, required) - Url to product image. See Introduction -  Links
 - description: Product Description (string, required) - Product description text
 - size: 200 ml (string, required) - Size of product (weight, volume...)
-- allergens (array[ProductAllergen], required, fixed-type) - List of allergens in product
 - additionalData (array[AdditionalData], optional, fixed-type) - Other product informations
 
 ## ProductAllergen
@@ -440,8 +444,7 @@ After payment validation, browser is redirected to specified return URL with GET
 
 
 ## OrderItem
-- productId: 123 (number, required) - Id of product to order
-- modifiers (array[number], required) - List of selected modifier ids.
+- menuItemId: 123 (number, required) - Id of meal to order
 - quantity: 2 (number, required) - Quantity of ordered product. If not provided quantity is 1.
 
 
@@ -455,10 +458,10 @@ After payment validation, browser is redirected to specified return URL with GET
 - canteenId: 12 (number, optional) - id of selected canteen
 
 ## MenuResponse
-- filters (array[MenuFilter], required, fixed-type) - Available filters for menu
-- menu (array[Menu], required, fixed-type) - Menu by days
 - timespan: week (MenuTimeSpan, required, sample) - Displayed timespan of menu
 - canteenId: 123 (number, required) - Canteen id of menu
+- filters (array[MenuFilter], required, fixed-type) - Available filters for menu
+- menu (array[Menu], required, fixed-type) - Menu by days
 
 ## Menu
 - date:  `dd-MM-yyyy` (string, required) - Date of menu
@@ -467,10 +470,13 @@ After payment validation, browser is redirected to specified return URL with GET
 
 ## MenuItem
 - id: 23 (number, required) - Id of menu item
-- productId: 2 (number, nullable, optional) - Id of product recipe
+- product (Product, nullable, optional) - Product recipe
 - price: 23 (number, required) - Price of item
 - name: Menu 1 (string, required) - Name of menu
-- status: SINGLE_ITEMstatu (MenuStatus, sample, required)
+- status: SINGLE_ITEM (MenuStatus, sample, required)
+- filter: launch (string, required) - Filter value of menu
+- allergens (array[ProductAllergen], required, fixed-type) - List of allergens in product
+- healthIndex: HEALTHY (HealthIndex, sample, nullable, optional)
 
 ## MenuFilter
 - value: launch (string, required) - Value for filter
@@ -478,35 +484,34 @@ After payment validation, browser is redirected to specified return URL with GET
 
 ## OrderDirectRequest
 - price: 300 (number, required) - Price of order.
-- item (MenuItem, required) - Item to order
+- item (OrderItem, required) - Item to order
 - orderDate: `dd-MM-yyyy` (string, required) - Date order will be created for
 - canteenId: 12 (number, required) - Canteen for order
+- additionalData (array[AdditionalDataRequest], optional) - Other order data
 
 ## OrderCartRequest
 - price: 300 (number, required) - Price of order.
 - orderDate: `dd-MM-yyyy` (string, required) - Date order will be created for
-- items (array[MenuItem], required, fixed-type) - Items to order
 - canteenId: 12 (number, required) - Canteen for order.
+- items (array[OrderItem], required, fixed-type) - Items to order
+- additionalData (array[AdditionalDataRequest], optional) - Other order data
 
 
 ## Order
 - id: abc (string, required) - Unique identification of order
 - date:  `dd-MM-yyyy` (string, required) - Date of order
 - filter: launch (string, required) - Group of order
-- items (array[MenuItem], required, fixed-type) - List of ordered products
 - canteenId: 77 (number, required)
 - status: ACTIVE (OrderStatus, sample, required) - Current status code of order
 - cancelStatus: POSSIBLE (CancelStatus, sample, required) - Cancel options
 - price: 232 (number, required) - Total price of order
+- items (array[OrderItem], required, fixed-type) - List of ordered products
 - additionalData (array[AdditionalData],optional, fixed-type) - Other order informations
-
-
 
 ## OrderConfirmation
 - id: abc (string, required) - Unique identification of order
 - status: ACTIVE (OrderStatus, required) - Current status code of order
 - orderPrice: 232 (number, required) - The order price.
-
 
 ## CustomerProfileRequest
 
@@ -514,7 +519,6 @@ After payment validation, browser is redirected to specified return URL with GET
 - firstName: John (string, required) - First name of customer
 - lastName: Doe (string, required) - Last name of customer
 - additionalData (array[AdditionalData], optional, fixed-type) - Other customer informations
-
 
 ## CustomerProfile (CustomerProfileRequest)
 - id: 832 (number, required) - Unique id of customer
