@@ -84,7 +84,24 @@ Get menu for customer. If no attributes are provided menu is based on customer d
 
 + Response 200 (application/json)
     + Attributes (MenuResponse)
+    
 
+
+### Get product details by ids [GET /products/details?productIds={ids}&modifiedOnly={modifiedOnly}]
+
+Parameter productIds defines which product details should be returned, if combined with modifiedOnly, results are filtered to contain only newly updated results from provided list of ids.
+
+
+Return list of requested product details.
+
++ Parameters
+    - ids:  1,2,3 (array[number], required) - List of product ids to be returned.
+    - modifiedOnly: true  (bool, required) - Filter list to contain only updated products.
++ Response 200  (application/json)
+    + Attributes (array[Product], fixed-type, required)
+    
+
+    
 ## Canteens [/canteen]
 
 ### Get canteens (NEW) [GET /canteen]
@@ -470,7 +487,7 @@ After payment validation, browser is redirected to specified return URL with GET
 
 ## MenuItem
 - id: 23 (number, required) - Id of menu item
-- product (Product, nullable, optional) - Product recipe
+- productId: 12Mod (number, nullable, optional) - Product recipe
 - price: 23 (number, required) - Price of item
 - name: Menu 1 (string, required) - Name of menu
 - status: SINGLE_ITEM (MenuStatus, sample, required)
