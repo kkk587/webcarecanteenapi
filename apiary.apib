@@ -87,20 +87,6 @@ Get menu for customer. If no attributes are provided menu is based on customer d
     
 
 
-### Get product details by ids [GET /products/details?productIds={ids}&modifiedOnly={modifiedOnly}]
-
-Parameter productIds defines which product details should be returned, if combined with modifiedOnly, results are filtered to contain only newly updated results from provided list of ids.
-
-
-Return list of requested product details.
-
-+ Parameters
-    - ids:  1,2,3 (array[number], required) - List of product ids to be returned.
-    - modifiedOnly: true  (bool, required) - Filter list to contain only updated products.
-+ Response 200  (application/json)
-    + Attributes (array[Product], fixed-type, required)
-    
-
     
 ## Canteens [/canteen]
 
@@ -122,6 +108,7 @@ Get list of canteens for customer.
 
 ### Create direct order (NEW) [POST /order/direct]
 
+Create direct order.
 Returns order confirmation.
 
 + Request (application/json)
@@ -140,6 +127,7 @@ Returns order confirmation.
         
 ### Create order from cart (NEW) [POST /order/cart]
 
+Create order from cart.
 Returns order confirmation.
 
 + Request (application/json)
@@ -200,136 +188,6 @@ Request verifies if combination of email and password provided by customer is co
         + token: abc (string, optional) - Authorization token for provided cardId
  
 
-### Customer registration (1st step) [POST /customer/register/start]
-
-Customer email, name and other profiles informations (components defined in web config) for registration. Email to customer is sent to verify his address.
-Email contains link needed (with token) to continue registration process.
-
-+ Request (application/json)
-    + Attributes (CustomerProfileRequest)
-
-+ Response 200 (application/json)
-    + Attributes
-        + success: true (boolean) - Confirmation of successful registration step.
-       
-
-### Customer registration (2st step) [POST /customer/register/finish]
-
-Customer enters his password and completes registration. Login is not needed after this step.
-
-+ Request (application/json)
-    + Attributes
-
-        + password (string, required) - Password provided by customer
-        + token: abc (string, required) - Token from emailed link. Customer is identified by token.
-+ Response 200 (application/json)
-    + Attributes
-        + success: true (boolean) - Confirmation of successful registration step.
-
-### Change Password [POST /customer/password/change]
-
-Need to provide old Password to authorize password change.
-
-
-+ Request (application/json)
-
-    + Headers
-    
-            Authorization: abc
-
-    + Attributes
-        + passwordOld (string, required) - Old password provided by customer to verifies his identity. Required if changing password of logged customer.
-        + passwordNew (string, required) - New password to change provided by customer.
-
-+ Response 200 (application/json)
-    + Attributes
-        + success: true (boolean)
-       
-
-### Request Password Reset [POST /customer/password/resetrequest]
-
-Email with link for password reset (reset key) is send to customer if customer exist in database.
-
-
-+ Request
-    + Attributes
-        + email (string, required) - Email of customer for password reset
-
-+ Response 200 (application/json)
-    + Attributes
-        + success: true (boolean) - Confirmation of successful email reset request
-       
-### Reset Password [POST /customer/password/reset]
-
-Second step of password reset. Need to provide key sent to customer by email (reset request).
-
-+ Request (application/json)
-
-
-    + Attributes
-        + passwordNew (string, required) - New password to change provided by customer.
-        + resetKey (string, required) - Reset key sent to customer by email. Customer is identified by by this key.
-
-+ Response 200 (application/json)
-    + Attributes
-        + success: true (boolean)
-       
-
-### Get Customer Profile [GET /customer]
-
-Returns profile of current customer.
-
-+ Request (application/json)
-    + Headers
-    
-            Authorization: abc (required)
-
-+ Response 200 (application/json)
-    + Attributes (CustomerProfile)
-
-### Change Customer Profile [POST /customer]
-
-Change customer informations.
-
-+ Request (application/json)
-    + Headers
-    
-            Authorization: abc (required)
-    + Attributes (CustomerProfileRequest)
-
-+ Response 200 (application/json)
-    + Attributes
-        + success: true (boolean)
-
-### Get active orders and last completed orders (CHANGED) [GET /customer/orders?limitClosedCount={limitClosedCount}&statusCodes={statusCodes}]
-
-Returns list of customer's last orders, closed orders are limited by query parameter limit.
-
-+ Parameters
-    - limitClosedCount: 5 (number, optional) - Number of closed orders to be returned. If not provided results are limited by Septim to 10 results.
-    - statusCodes (array[OrderStatus], optional) - List of status code to be included in results. If not provided orders are not filtered by status.
-+ Request (application/json)
-    + Headers
-    
-            Authorization: abc (required)
-
-+ Response 200 (application/json)
-    + Attributes (array[Order])
-    
-
-### Get order (CHANGED) [GET /customer/order?orderId={orderId}]
-
-Return single order of customer by id.
-
-+ Parameters
-    - orderId: abc (string) - Identification of order
-+ Request (application/json)
-    + Headers
-    
-            Authorization: abc (required)
-
-+ Response 200 (application/json)
-    + Attributes (Order)
 
 ### Top up customer account (NEW) [POST /customer/account/topup]
 
@@ -346,24 +204,22 @@ Request customer account top up. Webcare api creates unique transaction id for p
 + Response 200 (application/json)
     + Attributes 
         + transactionId: 2332 (number, required) - Unique transaction id for payment gateway.
-        
-
-### Get last transaction history & account balance [GET /customer/account?limitCount={limitCount}]
 
 
-Returns customer's transaction history and current account balance.
+### Get canteen orders (NEW) [GET /customer/canteenorders]
 
-+ Parameters
-    - limitCount: 5 (number) - Number of results to be returned. If not provided results are limited by Septim to 10 results.
+
+Request customer account top up. Webcare api creates unique transaction id for payment gateway.
+
 + Request (application/json)
     + Headers
     
             Authorization: abc (required)
 
 + Response 200 (application/json)
-    + Attributes 
-        + transactions (array[Transaction]) - List of transactions
-        + balance: 430 (number) - Current customer's balance
+    + Attributes (array[CanteenOrder])
+    
+                
 
 
 ### Top up payment result (NEW) [POST /customer/topup/result]
@@ -385,7 +241,7 @@ Request is authorized with admin credentials.
 ## Web API requests [/api]
 
 
-### Get payment link for(NEW) [POST /api/topup/link]
+### Get payment link for (NEW) [POST /api/topup/link]
 
 Not part of Septim API
     
@@ -452,7 +308,9 @@ After payment validation, browser is redirected to specified return URL with GET
 - image: image://123.jpg (string, required) - Url to product image. See Introduction -  Links
 - description: Product Description (string, required) - Product description text
 - size: 200 ml (string, required) - Size of product (weight, volume...)
+- healthIndex: HEALTHY (HealthIndex, sample, nullable, optional)
 - additionalData (array[AdditionalData], optional, fixed-type) - Other product informations
+- allergens (array[ProductAllergen], required, fixed-type) - List of allergens in product
 
 ## ProductAllergen
 
@@ -480,34 +338,31 @@ After payment validation, browser is redirected to specified return URL with GET
 - filters (array[MenuFilter], required, fixed-type) - Available filters for menu
 - menu (array[Menu], required, fixed-type) - Menu by days
 
-## Menu
-- date:  `dd-MM-yyyy` (string, required) - Date of menu
-- items (array[MenuItem], required, fixed-type) - Available menu items
-
+## Menu (array[MenuItem], required, fixed-type)
 
 ## MenuItem
 - id: 23 (number, required) - Id of menu item
-- productId: 12 (number, nullable, optional) - Product recipe
+- date:  `dd-MM-yyyy` (string, required) - Date of menu item
 - price: 23 (number, required) - Price of item
-- name: Menu 1 (string, required) - Name of menu
+- name: Menu 1 (string, required) - Name of menu item
 - status: SINGLE_ITEM (MenuStatus, sample, required)
-- filter: launch (string, required) - Filter value of menu
-- allergens (array[ProductAllergen], required, fixed-type) - List of allergens in product
-- healthIndex: HEALTHY (HealthIndex, sample, nullable, optional)
+- filter: vege (string, required) - Filter value of menu item
+- group: launch (string, required) - Group of meal for menu item
+- product (Product, nullable, optional) - Product recipe
 
 ## MenuFilter
 - value: launch (string, required) - Value for filter
 - label: Obed (string, required) - Label of filter
 
 ## OrderDirectRequest
-- price: 300 (number, required) - Price of order.
-- item (OrderItem, required) - Item to order
+- price: 300 (number, required) - Calculated price of order, price is verified with DB and if doesn't match error is thrown.
 - orderDate: `dd-MM-yyyy` (string, required) - Date order will be created for
 - canteenId: 12 (number, required) - Canteen for order
+- item (OrderItem, required) - Item to order
 - additionalData (array[AdditionalDataRequest], optional) - Other order data
 
 ## OrderCartRequest
-- price: 300 (number, required) - Price of order.
+- price: 300 (number, required) - Calculated price of order, price is verified with DB and if doesn't match error is thrown.
 - orderDate: `dd-MM-yyyy` (string, required) - Date order will be created for
 - canteenId: 12 (number, required) - Canteen for order.
 - items (array[OrderItem], required, fixed-type) - Items to order
@@ -520,25 +375,24 @@ After payment validation, browser is redirected to specified return URL with GET
 - filter: launch (string, required) - Group of order
 - canteenId: 77 (number, required)
 - status: ACTIVE (OrderStatus, sample, required) - Current status code of order
-- cancelStatus: POSSIBLE (CancelStatus, sample, required) - Cancel options
 - price: 232 (number, required) - Total price of order
 - items (array[OrderItem], required, fixed-type) - List of ordered products
 - additionalData (array[AdditionalData],optional, fixed-type) - Other order informations
+
+## CanteenOrder
+- id: abc (string, required) - Unique identification of order
+- date:  `dd-MM-yyyy` (string, required) - Date of order
+- canteenId: 77 (number, required) - Identification of canteen
+- quantity: 2 (number, required) - Quantity of ordered product. If not provided quantity is 1.
+- orderPrice: 232 (number, required) - The order price.
+- cancelStatus: POSSIBLE (CancelStatus, sample, required) - Cancel options
+- menuItem (MenuItem, required) - Ordered menu item
+
 
 ## OrderConfirmation
 - id: abc (string, required) - Unique identification of order
 - status: ACTIVE (OrderStatus, required) - Current status code of order
 - orderPrice: 232 (number, required) - The order price.
-
-## CustomerProfileRequest
-
-- email: john.doe@gmail.com (string, required) - Customer email (unique in database). Cannot be changed
-- firstName: John (string, required) - First name of customer
-- lastName: Doe (string, required) - Last name of customer
-- additionalData (array[AdditionalData], optional, fixed-type) - Other customer informations
-
-## CustomerProfile (CustomerProfileRequest)
-- id: 832 (number, required) - Unique id of customer
 
 
 ## AdditionalDataBase
@@ -552,11 +406,6 @@ After payment validation, browser is redirected to specified return URL with GET
 - label: Label (string, optional) - input label which describes the field. for type input-text
 - target (string, optional) - target of data object
 
-## Transaction
-- id: 23 (number, required) - Unique identificator of transaction
-- amount: `-300` (number, required) - Amount changed on customer account
-- dateTime `dd-MM-yyyy HH:mm`  (string, required) - DateTime of transaction
-- description: Payment of order 233 (string, required) - Description text of transaction
 
 ##GatewayRequest
 - toBePaid: 111 (number, required) - The amount, which should be paid.
