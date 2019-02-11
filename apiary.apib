@@ -166,25 +166,16 @@ Check if order can be placed.
 
 ## Customer profile & management [/customer]
 
-### Login (CHANGED) [POST /customer/login]
+### Login with card (NEW) [POST /customer/cardlogin]
 
-Verifies combination of customer email and password by authorization token. If combination is wrong error code is returned, otherwise response is successful and client can use the token to authorize other requests.
-
-
-Septim does not hold status of customer login. Every request is verified by Authorization token
-Request verifies if combination of email and password provided by customer is correct or provide Authorization token based on customer's card id.
-
+Returns customer's Basic Auth token. Identified by card reader.
 
 + Request (application/json)
-    + Headers
-    
-            Authorization: abc (optional) - If provided token is validated. 
     + Attributes
         + cardId: abc (string, optional) - Identification of card read by card reader.
         
 + Response 200 (application/json)
     + Attributes
-        + success: true (boolean, optional) - Result of authorization token validation.
         + token: abc (string, optional) - Authorization token for provided cardId
  
 
