@@ -69,6 +69,7 @@ All parameters and request attributes are optional by default.
 ## Menu [/menu]
 
 ### Get menu (NEW) [GET /menu?date={date}&timespan={timespan}&firstDay={firstDay}&canteenId={canteenId}]
+?? V parametrech není zdokumentovaný firstDate. A upřímně teď už ani netuším rozdíl mezi date a FirstDate. Pokud na to také nepřijdete v rámci toho, jak se to bude realizovat, tak bych nechal jenom firstDate.
 Get menu for customer. If no attributes are provided menu is based on customer default preferences set in Septim.
 
 + Parameters 
@@ -84,7 +85,7 @@ Get menu for customer. If no attributes are provided menu is based on customer d
 
 + Response 200 (application/json)
     + Attributes (MenuResponse)
-    
+?? Mám za to, že jsme se bavili, že položka menu (nabídky) nemá IDčko, objednáváme recepturu.     
 
 
     
@@ -113,6 +114,7 @@ Returns order confirmation.
 
 + Request (application/json)
     + Headers
+?? Měli by jsme objednávat produkt ne menu, to v podstatě neexistuje jako záznam
     
             Authorization: abc  (customer credentials)
     + Attributes (OrderDirectRequest)
@@ -132,7 +134,7 @@ Returns order confirmation.
 
 + Request (application/json)
     + Headers
-    
+?? Stejný problém s identifikací co objednáváme    
             Authorization: abc  (customer credentials)
             
     + Attributes (OrderCartRequest)
@@ -151,7 +153,8 @@ Check if order can be placed.
 
 + Request (application/json)
     + Headers
-    
+?? Stejný problém s identifikací co objednáváme
+
             Authorization: abc  (customer credentials)
             
     + Attributes (OrderCartRequest)
@@ -181,7 +184,7 @@ Returns customer's Basic Auth token. Identified by card reader.
 
 
 ### Top up customer account (NEW) [POST /customer/account/topup]
-
+?? Je to v souladu s aktuálním stavem práce s branami? Nevím o ničem, jenom vím, že jsme dělali nějaké změny. 
 
 Request customer account top up. Webcare api creates unique transaction id for payment gateway.
 
@@ -198,7 +201,7 @@ Request customer account top up. Webcare api creates unique transaction id for p
 
 
 ### Get canteen orders (NEW) [GET /customer/canteenorders]
-
+?? Komentář je asi dost blbě
 
 Request customer account top up. Webcare api creates unique transaction id for payment gateway.
 
@@ -209,7 +212,9 @@ Request customer account top up. Webcare api creates unique transaction id for p
 
 + Response 200 (application/json)
     + Attributes (array[CanteenOrder])
-    
+?? Struktura odpovědi je divná. Nemělo by tam být menuItem (to co z něj potřebujeme už máme správně v CanteenOrder)
+?? Místo menuItem potřebujeme product. Párování mezi nabídkou a objednávkami musíte dělat přes datum a productId.
+?? Nebojte se do tohoto komentáře dát informaci o způsobu párování za mně to sem patří. 
                 
 
 
@@ -217,6 +222,9 @@ Request customer account top up. Webcare api creates unique transaction id for p
 
 Request between private Web API and Septim API. Confirms successful payment of transaction or cancels transaction in case of error in payment.
 Request is authorized with admin credentials.
+
+?? Nerozumím tomu, proč máme dvě API metody. Až to bude k tomu (tedy víte že je zaplaceno), tak nabijeme konto.
+?? Teoreticky dokážu pochopit, že by jsme Vám uchovávali identifikátor transakce mezi požadavkem na platbu a potvrzením platby. Ale pak to tady musí být popsané.
     
 + Request (application/json)
     + Headers
@@ -239,6 +247,8 @@ Not part of Septim API
 Request between client and web api.
 
 After payment validation, browser is redirected to specified return URL with GET parameters withpayment result. (?paymentSuccess=true)
+
+?? tomuhle moc nerozumím a věta "Request between client and web api." tomu nepomáhá. 
 
 + Request (application/json)
     + Headers
