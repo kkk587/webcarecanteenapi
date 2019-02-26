@@ -117,6 +117,7 @@ Create direct order.
 Returns order confirmation.
 
 ?? Měli by jsme objednávat produkt ne menu, to v podstatě neexistuje jako záznam
+    
     -- Viz výše
 
 + Request (application/json)
@@ -139,6 +140,7 @@ Create order from cart.
 Returns order confirmation.
 
 ?? Stejný problém s identifikací co objednáváme    
+    
     -- Viz výše
 + Request (application/json)
     + Headers
@@ -160,6 +162,7 @@ Returns order confirmation.
 Check if order can be placed.
 
 ?? Stejný problém s identifikací co objednáváme
+    
     -- Viz výše
 + Request (application/json)
     + Headers
@@ -197,6 +200,7 @@ Returns customer's Basic Auth token. Identified by card reader.
 Request customer account top up. Webcare api creates unique transaction id for payment gateway.
 
 ?? Je to v souladu s aktuálním stavem práce s branami? Nevím o ničem, jenom vím, že jsme dělali nějaké změny. 
+    
     -- Ano, systém je stejný jaký se závádí do první verze - jediný rozdíl je v tom, že tady platba není vázaná na objednávku
 + Request (application/json)
     + Headers
@@ -215,6 +219,7 @@ Request customer account top up. Webcare api creates unique transaction id for p
 Request customer account top up. Webcare api creates unique transaction id for payment gateway.
 
 ?? Komentář je asi dost blbě
+ 
  -- Moje chyba opravím
  
 + Request (application/json)
@@ -236,6 +241,7 @@ Request is authorized with admin credentials.
 
 ?? Nerozumím tomu, proč máme dvě API metody. Až to bude k tomu (tedy víte že je zaplaceno), tak nabijeme konto.
 ?? Teoreticky dokážu pochopit, že by jsme Vám uchovávali identifikátor transakce mezi požadavkem na platbu a potvrzením platby. Ale pak to tady musí být popsané.
+    
     -- Touto metodou payment bridge předá zprávu, že došlo k úspěšnému zaplacení transakce přes platební bránu.
     
 + Request (application/json)
@@ -261,6 +267,7 @@ Request between client and payment bridge.
 After payment validation, browser is redirected to specified return URL with GET parameters withpayment result. (?paymentSuccess=true)
 
 ?? tomuhle moc nerozumím a věta "Request between client and web api." tomu nepomáhá. 
+    
     -- Nové označení je payment bridge - aplikace, která se stará o platby přes bránu. Tato část se netýká Septimu, ale zajištuje komunikaci mezi klientskou aplikací a payment bridge.
 
 + Request (application/json)
