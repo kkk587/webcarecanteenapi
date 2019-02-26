@@ -68,11 +68,17 @@ All parameters and request attributes are optional by default.
 
 ## Menu [/menu]
 
-### Get menu (NEW) [GET /menu?date={date}&timespan={timespan}&firstDay={firstDay}&canteenId={canteenId}]
+### Get menu (NEW) [GET /menu?timespan={timespan}&firstDay={firstDay}&canteenId={canteenId}]
 Get menu for customer. If no attributes are provided menu is based on customer default preferences set in Septim.
 
+?? V parametrech není zdokumentovaný firstDate. A upřímně teď už ani netuším rozdíl mezi date a FirstDate. Pokud na to také nepřijdete v rámci toho, jak se to bude realizovat, tak bych nechal jenom firstDate.
+    -- Už také nevím, nechávám jenom firstDay
+?? Mám za to, že jsme se bavili, že položka menu (nabídky) nemá IDčko, objednáváme recepturu.   
+ -- O tom jsme se nebavili, ani to není možné, protože dle informace od Vás lze objednávat jídlo i když nemá přiřazenou recepturu (mail 5. 12. 2018 17:59) - položka menu (neboli jídlo) má u sebe cenu. Id jídla je několikrát zmiňováno ve Vašem zadání i a zároveň při řešení https://github.com/MRzr/webcarecanteenapi/pull/1/files/9bde635752d960ff7a82b89a4af370765f413eb8
+ 
+
 + Parameters 
-    - date:  `dd-MM-yyyy` (string, optional) - Date of order
+    - firstDay:  `dd-MM-yyyy` (string, optional) - First day of requested menu.
     - timespan: DAY (MenuTimeSpan, optional) - selected time span of order
     - canteenId: 12 (number, optional) - id of selected canteen
 
@@ -84,7 +90,6 @@ Get menu for customer. If no attributes are provided menu is based on customer d
 
 + Response 200 (application/json)
     + Attributes (MenuResponse)
-    
 
 
     
@@ -111,6 +116,9 @@ Get list of canteens for customer.
 Create direct order.
 Returns order confirmation.
 
+?? Měli by jsme objednávat produkt ne menu, to v podstatě neexistuje jako záznam
+    -- Viz výše
+
 + Request (application/json)
     + Headers
     
@@ -130,11 +138,13 @@ Returns order confirmation.
 Create order from cart.
 Returns order confirmation.
 
+?? Stejný problém s identifikací co objednáváme    
+    -- Viz výše
 + Request (application/json)
     + Headers
-    
+        
             Authorization: abc  (customer credentials)
-            
+    
     + Attributes (OrderCartRequest)
 
         
@@ -149,9 +159,11 @@ Returns order confirmation.
 
 Check if order can be placed.
 
+?? Stejný problém s identifikací co objednáváme
+    -- Viz výše
 + Request (application/json)
     + Headers
-    
+
             Authorization: abc  (customer credentials)
             
     + Attributes (OrderCartRequest)
@@ -182,9 +194,10 @@ Returns customer's Basic Auth token. Identified by card reader.
 
 ### Top up customer account (NEW) [POST /customer/account/topup]
 
-
 Request customer account top up. Webcare api creates unique transaction id for payment gateway.
 
+?? Je to v souladu s aktuálním stavem práce s branami? Nevím o ničem, jenom vím, že jsme dělali nějaké změny. 
+    -- Ano, systém je stejný jaký se závádí do první verze - jediný rozdíl je v tom, že tady platba není vázaná na objednávku
 + Request (application/json)
     + Headers
     
@@ -199,9 +212,11 @@ Request customer account top up. Webcare api creates unique transaction id for p
 
 ### Get canteen orders (NEW) [GET /customer/canteenorders]
 
-
 Request customer account top up. Webcare api creates unique transaction id for payment gateway.
 
+?? Komentář je asi dost blbě
+ -- Moje chyba opravím
+ 
 + Request (application/json)
     + Headers
     
@@ -209,14 +224,19 @@ Request customer account top up. Webcare api creates unique transaction id for p
 
 + Response 200 (application/json)
     + Attributes (array[CanteenOrder])
-    
-                
-
+?? Struktura odpovědi je divná. Nemělo by tam být menuItem (to co z něj potřebujeme už máme správně v CanteenOrder)
+?? Místo menuItem potřebujeme product. Párování mezi nabídkou a objednávkami musíte dělat přes datum a productId.
+?? Nebojte se do tohoto komentáře dát informaci o způsobu párování za mně to sem patří. 
+    -- Žádné párování neprobíhá na straně klientské aplikace neprobíhá, domluvili jsme se že chodí veškerá data kompletní (stejně jako je v Get menu). ProductId může být null a i když má hodnotu, tak není záruka, že máme zrovna máme detail receptury - v daný moment máme pouze receptury, které jsou zobrazeny ve výpisu.
 
 ### Top up payment result (NEW) [POST /customer/topup/result]
 
-Request between private Web API and Septim API. Confirms successful payment of transaction or cancels transaction in case of error in payment.
+Request between private Payment bridge and Septim API. Confirms successful payment of transaction or cancels transaction in case of error in payment.
 Request is authorized with admin credentials.
+
+?? Nerozumím tomu, proč máme dvě API metody. Až to bude k tomu (tedy víte že je zaplaceno), tak nabijeme konto.
+?? Teoreticky dokážu pochopit, že by jsme Vám uchovávali identifikátor transakce mezi požadavkem na platbu a potvrzením platby. Ale pak to tady musí být popsané.
+    -- Touto metodou payment bridge předá zprávu, že došlo k úspěšnému zaplacení transakce přes platební bránu.
     
 + Request (application/json)
     + Headers
@@ -236,9 +256,12 @@ Request is authorized with admin credentials.
 
 Not part of Septim API
     
-Request between client and web api.
+Request between client and payment bridge.
 
 After payment validation, browser is redirected to specified return URL with GET parameters withpayment result. (?paymentSuccess=true)
+
+?? tomuhle moc nerozumím a věta "Request between client and web api." tomu nepomáhá. 
+    -- Nové označení je payment bridge - aplikace, která se stará o platby přes bránu. Tato část se netýká Septimu, ale zajištuje komunikaci mezi klientskou aplikací a payment bridge.
 
 + Request (application/json)
     + Headers
