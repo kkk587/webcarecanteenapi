@@ -74,10 +74,13 @@ Get menu for customer. If no attributes are provided menu is based on customer d
 ?? V parametrech není zdokumentovaný firstDate. A upřímně teď už ani netuším rozdíl mezi date a FirstDate. Pokud na to také nepřijdete v rámci toho, jak se to bude realizovat, tak bych nechal jenom firstDate.
     
     -- Už také nevím, nechávám jenom firstDay
+    ?? OK
 
 ?? Mám za to, že jsme se bavili, že položka menu (nabídky) nemá IDčko, objednáváme recepturu.   
  
  -- O tom jsme se nebavili, ani to není možné, protože dle informace od Vás lze objednávat jídlo i když nemá přiřazenou recepturu (mail 5. 12. 2018 17:59) - položka menu (neboli jídlo) má u sebe cenu. Id jídla je několikrát zmiňováno ve Vašem zadání i a zároveň při řešení https://github.com/MRzr/webcarecanteenapi/pull/1/files/9bde635752d960ff7a82b89a4af370765f413eb8
+ ?? Aha, nejedná se tedy o menu id ale o id jídla. To tam můžeme dávat to není problém a je to jasný. Jenom pro upřesnění, jídlo je každý den stejné a má každý den stejný IDčko. Proto také u objednávky potřebujeme datum a ID jídla. 
+ ?? Takže přejmenovat na mealID a správně popsat
  
 
 + Parameters 
@@ -122,6 +125,7 @@ Returns order confirmation.
 ?? Měli by jsme objednávat produkt ne menu, to v podstatě neexistuje jako záznam
     
     -- Viz výše
+    ?? asi vyřešeno
 
 + Request (application/json)
     + Headers
@@ -205,6 +209,7 @@ Request customer account top up. Webcare api creates unique transaction id for p
 ?? Je to v souladu s aktuálním stavem práce s branami? Nevím o ničem, jenom vím, že jsme dělali nějaké změny. 
     
     -- Ano, systém je stejný jaký se závádí do první verze - jediný rozdíl je v tom, že tady platba není vázaná na objednávku
+    ?? Ještě pořád? Vím že se to zase nějak aktualizovalo a nechci to řešit. Máte mojí důvěru. 
 + Request (application/json)
     + Headers
     
@@ -236,6 +241,10 @@ Request customer account top up. Webcare api creates unique transaction id for p
 ?? Místo menuItem potřebujeme product. Párování mezi nabídkou a objednávkami musíte dělat přes datum a productId.
 ?? Nebojte se do tohoto komentáře dát informaci o způsobu párování za mně to sem patří. 
     -- Žádné párování neprobíhá na straně klientské aplikace neprobíhá, domluvili jsme se že chodí veškerá data kompletní (stejně jako je v Get menu). ProductId může být null a i když má hodnotu, tak není záruka, že máme zrovna máme detail receptury - v daný moment máme pouze receptury, které jsou zobrazeny ve výpisu.
+    ?? platí že se nevrací menuItem, menuItem je položka nabídky. Tady se ale vrací hotové objednávky, tedy orderItem
+    ?? párování na klientské straně musí probíhat, protože do nabídky musíte promítnout existující objednávky, takže párovat by se mělo přes datum a mealID
+    ?? Septim by měl vracet jak mealID tak productID (ten může být null)
+    
 
 ### Top up payment result (NEW) [POST /customer/topup/result]
 
@@ -246,6 +255,7 @@ Request is authorized with admin credentials.
 ?? Teoreticky dokážu pochopit, že by jsme Vám uchovávali identifikátor transakce mezi požadavkem na platbu a potvrzením platby. Ale pak to tady musí být popsané.
     
     -- Touto metodou payment bridge předá zprávu, že došlo k úspěšnému zaplacení transakce přes platební bránu.
+    ?? OK, už se to ke mně dostalo v rámci toho jak to řešíme u nás. Nicméně pořád platí, že tady musí být popsáno jak to funguje. Nebo, pokud to funguje stejně jako jinde, tak na to musí být alespoň odkaz.
     
 + Request (application/json)
     + Headers
@@ -272,6 +282,7 @@ After payment validation, browser is redirected to specified return URL with GET
 ?? tomuhle moc nerozumím a věta "Request between client and web api." tomu nepomáhá. 
     
     -- Nové označení je payment bridge - aplikace, která se stará o platby přes bránu. Tato část se netýká Septimu, ale zajištuje komunikaci mezi klientskou aplikací a payment bridge.
+    ?? Asi OK
 
 + Request (application/json)
     + Headers
